@@ -126,3 +126,7 @@ tests/ui/      tests UI de bout en bout (jsdom), `npm i` puis `node ui-test.mjs`
 ## Contribuer
 
 Toute proposition est la bienvenue : *issue* pour signaler un bug ou suggérer une idée, *pull request* pour proposer du code. Avant une PR, merci de lancer `./build-offline.sh` (build + tests API + tests UI) et de vérifier que tout passe.
+
+## Licence
+
+Ce projet est distribué sous licence [GPL-3.0](LICENSE), comme la plupart des plugins Jellyfin.
