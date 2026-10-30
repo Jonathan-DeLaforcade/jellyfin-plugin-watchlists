@@ -1,0 +1,806 @@
+<div class="wl-app">
+<style>
+.wl-app { --wl-gap: 1rem; --wl-muted: rgba(128,128,128,.85); --wl-surface: rgba(128,128,128,.12); --wl-surface-2: rgba(128,128,128,.2); --wl-accent: #00a4dc; --wl-danger: #d9534f; max-width: 1400px; margin: 0 auto; padding-top: 1rem; }
+.wl-app * { box-sizing: border-box; }
+.wl-app h1 { font-size: 1.8em; margin: 0; font-weight: 500; }
+.wl-app h2 { font-size: 1.25em; margin: 1.5rem 0 .75rem; font-weight: 500; }
+.wl-head { display: flex; align-items: center; justify-content: space-between; gap: var(--wl-gap); flex-wrap: wrap; margin-bottom: 1rem; }
+.wl-tabs { display: flex; gap: .5rem; flex-wrap: wrap; margin-bottom: 1.25rem; }
+.wl-tab { background: var(--wl-surface); border: 0; color: inherit; padding: .5em 1em; border-radius: 999px; cursor: pointer; font: inherit; }
+.wl-tab.active { background: var(--wl-accent); color: #fff; }
+.wl-count { display: inline-block; min-width: 1.4em; padding: 0 .35em; margin-left: .35em; border-radius: 999px; background: var(--wl-danger); color: #fff; font-size: .8em; text-align: center; }
+.wl-btn { display: inline-flex; align-items: center; gap: .35em; background: var(--wl-surface-2); border: 0; color: inherit; padding: .55em 1em; border-radius: .3em; cursor: pointer; font: inherit; line-height: 1.2; }
+.wl-btn:hover { filter: brightness(1.15); }
+.wl-btn:disabled { opacity: .45; cursor: default; }
+.wl-btn.primary { background: var(--wl-accent); color: #fff; }
+.wl-btn.danger { background: var(--wl-danger); color: #fff; }
+.wl-btn.icon { padding: .35em; border-radius: 50%; background: rgba(0,0,0,.55); color: #fff; }
+.wl-btn .material-icons { font-size: 1.2em; }
+.wl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: var(--wl-gap); }
+.wl-card { background: var(--wl-surface); border-radius: .4em; overflow: hidden; cursor: pointer; display: flex; flex-direction: column; }
+.wl-card:hover { outline: 2px solid var(--wl-accent); }
+.wl-collage { aspect-ratio: 16/10; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; background: var(--wl-surface-2); }
+.wl-collage.n1 { grid-template-columns: 1fr; grid-template-rows: 1fr; }
+.wl-collage img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.wl-collage .wl-empty { grid-column: 1 / -1; grid-row: 1 / -1; display: flex; align-items: center; justify-content: center; color: var(--wl-muted); }
+.wl-collage .wl-empty .material-icons { font-size: 3em; }
+.wl-card-body { padding: .6em .75em .8em; }
+.wl-card-title { font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wl-meta { color: var(--wl-muted); font-size: .85em; margin-top: .2em; }
+.wl-badges { display: flex; gap: .3em; flex-wrap: wrap; margin-top: .4em; }
+.wl-badge { font-size: .72em; padding: .15em .55em; border-radius: 999px; background: var(--wl-surface-2); white-space: nowrap; }
+.wl-badge.pub { background: rgba(0,164,220,.25); }
+.wl-badge.shared { background: rgba(92,184,92,.25); }
+.wl-badge.inv { background: rgba(240,173,78,.35); }
+.wl-empty-state { color: var(--wl-muted); padding: 2rem 0; text-align: center; }
+.wl-detail-head { display: flex; gap: var(--wl-gap); align-items: flex-start; justify-content: space-between; flex-wrap: wrap; }
+.wl-detail-head .wl-desc { color: var(--wl-muted); margin: .4em 0 0; white-space: pre-wrap; }
+.wl-actions { display: flex; gap: .5rem; flex-wrap: wrap; }
+.wl-members { display: flex; gap: .4rem; flex-wrap: wrap; margin-top: .75rem; }
+.wl-chip { background: var(--wl-surface); padding: .25em .7em; border-radius: 999px; font-size: .85em; }
+.wl-chip small { color: var(--wl-muted); margin-left: .3em; }
+.wl-banner { background: rgba(240,173,78,.18); border-left: 4px solid #f0ad4e; padding: .75em 1em; border-radius: .3em; margin: 1rem 0; display: flex; gap: 1rem; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+.wl-search { position: relative; margin: 1.25rem 0; max-width: 560px; }
+.wl-input, .wl-select, .wl-textarea { width: 100%; background: var(--wl-surface); color: inherit; border: 1px solid var(--wl-surface-2); border-radius: .3em; padding: .6em .75em; font: inherit; }
+.wl-select option { color: #000; }
+.wl-textarea { min-height: 4.5em; resize: vertical; }
+.wl-results { position: absolute; z-index: 10; left: 0; right: 0; top: calc(100% + 4px); background: #202020; color: #eee; border-radius: .3em; box-shadow: 0 6px 24px rgba(0,0,0,.5); max-height: 60vh; overflow: auto; }
+.wl-result { display: flex; gap: .75em; align-items: center; padding: .45em .6em; cursor: pointer; }
+.wl-result:hover, .wl-result.focus { background: rgba(255,255,255,.08); }
+.wl-result img, .wl-result .wl-ph { width: 36px; height: 54px; object-fit: cover; border-radius: 2px; background: #333; flex: none; }
+.wl-result .wl-in { margin-left: auto; color: #8c8; font-size: .8em; }
+.wl-items { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: var(--wl-gap); }
+.wl-item { position: relative; }
+.wl-poster { position: relative; aspect-ratio: 2/3; background: var(--wl-surface-2); border-radius: .3em; overflow: hidden; display: block; }
+.wl-poster img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.wl-poster .wl-ph { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; text-align: center; padding: .5em; color: var(--wl-muted); }
+.wl-item.unavailable .wl-poster { opacity: .45; }
+.wl-marks { position: absolute; top: .35em; left: .35em; display: flex; gap: .25em; pointer-events: none; }
+.wl-mark { display: flex; align-items: center; justify-content: center; width: 1.7em; height: 1.7em; border-radius: 50%; background: rgba(0,0,0,.7); box-shadow: 0 1px 4px rgba(0,0,0,.5); }
+.wl-mark .material-icons { font-size: 1.1em; }
+.wl-mark.played { background: #00a4dc; color: #fff; }
+.wl-mark.fav { background: #e5375b; color: #fff; }
+.wl-tools { position: absolute; top: .35em; right: .35em; display: flex; gap: .25em; opacity: 0; transition: opacity .15s; }
+.wl-item:hover .wl-tools, .wl-item:focus-within .wl-tools { opacity: 1; }
+@media (hover: none) { .wl-tools { opacity: 1; } }
+.wl-item-title { margin-top: .4em; font-size: .92em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wl-note { font-size: .8em; font-style: italic; color: var(--wl-muted); margin-top: .15em; word-break: break-word; }
+.wl-panel { background: var(--wl-surface); border-radius: .4em; padding: 1rem; margin: 1rem 0; }
+.wl-form { display: grid; gap: .75rem; max-width: 560px; }
+.wl-form label { display: grid; gap: .3em; font-size: .9em; }
+.wl-row { display: flex; gap: .5rem; align-items: center; flex-wrap: wrap; }
+.wl-member-row { display: flex; gap: .5rem; align-items: center; padding: .4em 0; border-bottom: 1px solid var(--wl-surface-2); flex-wrap: wrap; }
+.wl-member-row .wl-name { flex: 1 1 140px; }
+.wl-member-row .wl-select { width: auto; }
+.wl-toast { position: fixed; left: 50%; bottom: 2rem; transform: translateX(-50%); background: #323232; color: #fff; padding: .7em 1.2em; border-radius: .3em; z-index: 9999; box-shadow: 0 4px 16px rgba(0,0,0,.4); max-width: 90vw; }
+.wl-toast.err { background: #a33; }
+.wl-loading { color: var(--wl-muted); padding: 1rem 0; }
+.wl-status { position: absolute; left: .35em; bottom: .35em; right: .35em; display: flex; gap: .25em; flex-wrap: wrap; align-items: center; pointer-events: none; }
+.wl-status .wl-badge { font-size: .7em; background: rgba(0,0,0,.75); color: #fff; }
+.wl-status .wl-badge.ok { background: rgba(46,125,50,.92); }
+.wl-status .wl-badge.wait { background: rgba(240,173,78,.95); color: #222; }
+.wl-status .wl-badge.off { background: rgba(60,60,60,.92); }
+.wl-status .wl-btn { pointer-events: auto; font-size: .75em; padding: .3em .6em; }
+.wl-item.absent .wl-poster img { filter: grayscale(.85) brightness(.7); }
+.wl-filters { display: flex; gap: .4rem; flex-wrap: wrap; margin: -.25rem 0 1rem; }
+.wl-filters .wl-tab { font-size: .85em; padding: .35em .8em; }
+.wl-result .wl-tag { margin-left: auto; font-size: .75em; padding: .1em .5em; border-radius: 999px; white-space: nowrap; }
+.wl-result .wl-tag.ok { background: rgba(46,125,50,.6); }
+.wl-result .wl-tag.off { background: rgba(120,120,120,.45); }
+.wl-result .wl-tag.wait { background: rgba(240,173,78,.6); }
+.wl-result .wl-tag.in { background: rgba(0,164,220,.5); }
+.wl-owner { display: flex; align-items: baseline; gap: .5em; }
+.wl-owner .wl-meta { font-size: .7em; }
+.wl-badge.admin { background: rgba(217,83,79,.35); }
+.wl-item.seen .wl-poster { opacity: .4; }
+.wl-item.seen .wl-item-title { opacity: .6; }
+.wl-check { display: inline-flex; align-items: center; gap: .4em; padding: .35em .8em; border-radius: 999px; background: var(--wl-surface-2); cursor: pointer; font-size: .9em; }
+.wl-check input { margin: 0; }
+.wl-pick-panel h2 { margin-top: 0; }
+.wl-pick-panel .wl-row + .wl-row { margin-top: .75rem; }
+.wl-pick-panel .wl-select { width: auto; }
+.wl-pick-result { display: flex; gap: 1rem; align-items: flex-start; margin-top: 1rem; }
+.wl-pick-result img { width: 120px; aspect-ratio: 2/3; object-fit: cover; border-radius: .3em; background: var(--wl-surface-2); flex: none; }
+.wl-pick-result h3 { margin: 0 0 .3em; font-size: 1.2em; font-weight: 500; }
+.wl-pick-result .wl-row { margin-top: .75rem; }
+.wl-results .wl-section { padding: .4em .6em .2em; font-size: .75em; text-transform: uppercase; letter-spacing: .05em; color: #aaa; }
+</style>
+
+<div class="wl-root"><div class="wl-loading">Chargement…</div></div>
+
+<script>
+(function () {
+    'use strict';
+    var app = document.currentScript ? document.currentScript.closest('.wl-app') : null;
+    if (!app) {
+        var all = document.querySelectorAll('.wl-app');
+        app = all[all.length - 1];
+    }
+    var root = app.querySelector('.wl-root');
+    var client = window.ApiClient;
+    var userId = client.getCurrentUserId();
+    var state = { tab: 'mine', detailId: null, settingsOpen: false, isAdmin: false, users: null, invitations: 0, seerr: { enabled: false }, filter: 'all', availability: {}, userData: {},
+        pick: { open: false, members: [], includeSeen: false, type: '', maxMin: '', genre: '', data: null, drawn: [], current: null } };
+
+    // ------------------------------------------------------------ utils
+    function esc(v) {
+        return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) {
+            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+        });
+    }
+    function h(html) { var t = document.createElement('template'); t.innerHTML = html.trim(); return t.content; }
+    function api(method, path, body) {
+        var opts = { type: method, url: client.getUrl(path), dataType: 'json' };
+        if (body !== undefined) { opts.data = JSON.stringify(body); opts.contentType = 'application/json'; }
+        return client.ajax(opts).catch(function (err) {
+            if (err && typeof err.json === 'function') {
+                return err.json().then(function (j) { throw new Error(j && j.error ? j.error : ('Erreur ' + err.status)); },
+                    function () { throw new Error('Erreur ' + err.status); });
+            }
+            throw err instanceof Error ? err : new Error('Erreur réseau');
+        });
+    }
+    function toast(msg, isErr) {
+        var t = document.createElement('div');
+        t.className = 'wl-toast' + (isErr ? ' err' : '');
+        t.textContent = msg;
+        document.body.appendChild(t);
+        setTimeout(function () { t.remove(); }, isErr ? 5000 : 2500);
+    }
+    function fail(e) { toast(e && e.message ? e.message : String(e), true); }
+    function img(id, h) { return client.getUrl('Items/' + id + '/Images/Primary', { fillHeight: h || 330, quality: 90 }); }
+    function tmdbImg(path, w) { return /^\/[A-Za-z0-9_.-]+$/.test(path || '') ? 'https://image.tmdb.org/t/p/w' + (w || 342) + path : ''; }
+    function posterUrl(p, h) { return p.itemId ? img(p.itemId, h) : tmdbImg(p.posterPath, h > 300 ? 342 : 185); }
+    function norm(id) { return String(id || '').replace(/-/g, '').toLowerCase(); }
+    var statusInfo = {
+        Available: { label: 'Sur le serveur', cls: 'ok' },
+        NotOnServer: { label: 'Pas sur le serveur', cls: 'off' },
+        NotRequested: { label: 'Pas sur le serveur', cls: 'off' },
+        Pending: { label: 'Demandé', cls: 'wait' },
+        Processing: { label: 'Téléchargement en cours', cls: 'wait' },
+        SeerrAvailable: { label: 'Pas sur le serveur (Jellyseerr pas à jour)', cls: 'off' },
+        Blocklisted: { label: 'Bloqué dans Jellyseerr', cls: 'off' },
+        Unknown: { label: 'Pas sur le serveur', cls: 'off' }
+    };
+    function itemLink(id) { return '#/details?id=' + encodeURIComponent(id) + '&serverId=' + encodeURIComponent(client.serverId()); }
+    var roleLabel = { Owner: 'Propriétaire', Editor: 'Éditeur', Viewer: 'Lecteur' };
+    function alive() { return document.body.contains(root); }
+    // closest() limité à la page du plugin : la page hôte de Jellyfin porte elle-même des data-* (data-role="page"...).
+    function pick(e, sel) { var el = e.target && e.target.closest ? e.target.closest(sel) : null; return el && root.contains(el) ? el : null; }
+
+    // ------------------------------------------------------------ rendu : listes
+    function cardHtml(w) {
+        var posters = (w.posters && w.posters.length ? w.posters : (w.posterItemIds || []).map(function (id) { return { itemId: id }; }))
+            .filter(function (p) { return posterUrl(p, 240); });
+        var n = posters.length;
+        var collage = n === 0
+            ? '<div class="wl-empty"><span class="material-icons">playlist_add</span></div>'
+            : posters.slice(0, n >= 4 ? 4 : 1).map(function (p) { return '<img loading="lazy" alt="" src="' + esc(posterUrl(p, 240)) + '" onerror="this.style.visibility=\'hidden\'">'; }).join('');
+        var badges = [];
+        badges.push(w.visibility === 'Public' ? '<span class="wl-badge pub">Publique</span>' : '<span class="wl-badge">Privée</span>');
+        if (w.memberCount > 1) badges.push('<span class="wl-badge shared">Commune · ' + w.memberCount + '</span>');
+        if (w.myStatus === 'Invited') badges.push('<span class="wl-badge inv">Invitation</span>');
+        else if (w.myRole && w.myRole !== 'Owner') badges.push('<span class="wl-badge">' + esc(roleLabel[w.myRole]) + '</span>');
+        if (w.isFollowed) badges.push('<span class="wl-badge">Suivie</span>');
+        if (w.invitedCount) badges.push('<span class="wl-badge inv">' + w.invitedCount + ' invitation' + (w.invitedCount > 1 ? 's' : '') + '</span>');
+        // Vue admin : les autres membres (le propriétaire est le titre du groupe).
+        var others = (w.members || []).filter(function (m) { return !w.owner || m.id !== w.owner.id; });
+        return '<div class="wl-card" tabindex="0" data-open="' + esc(w.id) + '">'
+            + '<div class="wl-collage' + (n > 0 && n < 4 ? ' n1' : '') + '">' + collage + '</div>'
+            + '<div class="wl-card-body"><div class="wl-card-title" title="' + esc(w.name) + '">' + esc(w.name) + '</div>'
+            + '<div class="wl-meta">' + w.itemCount + ' titre' + (w.itemCount > 1 ? 's' : '')
+                + (w.itemCount > 0 && w.availableCount !== undefined && w.availableCount < w.itemCount ? ' · ' + w.availableCount + ' sur le serveur' : '')
+                + (w.owner && !w.members ? ' · ' + esc(w.owner.name) : '') + '</div>'
+            + (others.length ? '<div class="wl-meta" title="' + esc(others.map(function (m) { return m.name; }).join(', ')) + '" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">avec '
+                + esc(others.map(function (m) { return m.name; }).join(', ')) + '</div>' : '')
+            + '<div class="wl-badges">' + badges.join('') + '</div></div></div>';
+    }
+
+    var tabs = [
+        { id: 'mine', label: 'Mes listes', path: 'Watchlists', empty: 'Aucune watchlist. Créez-en une avec « Nouvelle liste ».' },
+        { id: 'public', label: 'Découvrir', path: 'Watchlists/Public', empty: 'Aucune watchlist publique des autres utilisateurs.' },
+        { id: 'followed', label: 'Suivies', path: 'Watchlists/Followed', empty: 'Vous ne suivez aucune watchlist publique.' },
+        { id: 'invitations', label: 'Invitations', path: 'Watchlists/Invitations', empty: 'Aucune invitation en attente.' },
+        { id: 'admin', label: 'Toutes (admin)', path: 'Watchlists/Admin/All', admin: true, empty: 'Aucune watchlist sur le serveur.' }
+    ];
+
+    // Vue admin : un groupe par propriétaire (la liste arrive triée par propriétaire puis par nom).
+    function adminHtml(lists) {
+        var groups = [];
+        lists.forEach(function (w) {
+            var name = w.owner ? w.owner.name : 'Sans propriétaire';
+            var g = groups[groups.length - 1];
+            if (!g || g.name !== name) groups.push(g = { name: name, lists: [] });
+            g.lists.push(w);
+        });
+        return '<div class="wl-meta">' + lists.length + ' watchlist' + (lists.length > 1 ? 's' : '') + ' · ' + groups.length + ' propriétaire' + (groups.length > 1 ? 's' : '') + '</div>'
+            + groups.map(function (g) {
+                return '<h2 class="wl-owner">' + esc(g.name) + '<span class="wl-meta">' + g.lists.length + ' liste' + (g.lists.length > 1 ? 's' : '') + '</span></h2>'
+                    + '<div class="wl-grid">' + g.lists.map(cardHtml).join('') + '</div>';
+            }).join('');
+    }
+
+    function renderHome() {
+        if (state.tab === 'admin' && !state.isAdmin) state.tab = 'mine';
+        var tab = tabs.filter(function (t) { return t.id === state.tab; })[0];
+        root.innerHTML = '';
+        root.appendChild(h(
+            '<div class="wl-head"><h1>Watchlists</h1><div class="wl-row">'
+                + '<button class="wl-btn" data-act="pick" aria-expanded="' + state.pick.open + '"><span class="material-icons">casino</span>Que regarder ?</button>'
+                + '<button class="wl-btn primary" data-act="new"><span class="material-icons">add</span>Nouvelle liste</button></div></div>'
+            + '<div class="wl-pick"></div>'
+            + '<div class="wl-new"></div>'
+            + '<div class="wl-tabs">' + tabs.filter(function (t) { return !t.admin || state.isAdmin; }).map(function (t) {
+                return '<button class="wl-tab' + (t.id === state.tab ? ' active' : '') + '" data-tab="' + t.id + '">' + t.label
+                    + (t.id === 'invitations' && state.invitations > 0 ? '<span class="wl-count">' + state.invitations + '</span>' : '') + '</button>';
+            }).join('') + '</div>'
+            + '<div class="wl-list"><div class="wl-loading">Chargement…</div></div>'));
+        renderPick();
+
+        api('GET', 'Watchlists/Invitations').then(function (inv) {
+            if (state.invitations !== inv.length) { state.invitations = inv.length; if (state.tab !== 'invitations') updateInvCount(); }
+        }).catch(function () {});
+
+        api('GET', tab.path).then(function (lists) {
+            if (!alive()) return;
+            if (tab.id === 'invitations') { state.invitations = lists.length; updateInvCount(); }
+            var box = root.querySelector('.wl-list');
+            box.innerHTML = lists.length
+                ? (tab.id === 'admin' ? adminHtml(lists) : '<div class="wl-grid">' + lists.map(cardHtml).join('') + '</div>')
+                : '<div class="wl-empty-state">' + esc(tab.empty) + '</div>';
+        }).catch(fail);
+    }
+
+    function updateInvCount() {
+        var b = root.querySelector('[data-tab="invitations"]');
+        if (!b) return;
+        b.innerHTML = 'Invitations' + (state.invitations > 0 ? '<span class="wl-count">' + state.invitations + '</span>' : '');
+    }
+
+    function showNewForm() {
+        var box = root.querySelector('.wl-new');
+        if (box.firstChild) { box.innerHTML = ''; return; }
+        box.appendChild(h('<form class="wl-panel wl-form" data-form="create">'
+            + '<label>Nom<input class="wl-input" name="name" maxlength="100" required></label>'
+            + '<label>Description<textarea class="wl-textarea" name="description" maxlength="500"></textarea></label>'
+            + '<label>Visibilité<select class="wl-select" name="visibility"><option value="Private">Privée (membres uniquement)</option><option value="Public">Publique (visible par tous les utilisateurs)</option></select></label>'
+            + '<div class="wl-row"><button class="wl-btn primary" type="submit">Créer</button><button class="wl-btn" type="button" data-act="cancel-new">Annuler</button></div></form>'));
+        box.querySelector('input').focus();
+    }
+
+    // ------------------------------------------------------------ tirage au sort
+    // Le serveur renvoie les titres non vus (sauf « inclure les déjà vus ») des listes communes à moi et aux
+    // membres cochés ; la page filtre par type / durée / genre et tire au hasard, sans répéter un titre déjà tiré.
+    var PICK_DURATIONS = [['', 'Toutes durées'], ['90', 'Moins de 1 h 30'], ['120', 'Moins de 2 h'], ['150', 'Moins de 2 h 30']];
+    var PICK_TYPES = [['', 'Films et séries'], ['Movie', 'Films'], ['Series', 'Séries']];
+
+    function fmtMinutes(m) { return m >= 60 ? Math.floor(m / 60) + ' h ' + ('0' + (m % 60)).slice(-2) : m + ' min'; }
+
+    function loadPick() {
+        var p = state.pick;
+        p.data = null;
+        p.drawn = [];
+        p.current = null;
+        renderPick();
+        api('GET', 'Watchlists/Pick?members=' + p.members.join(',') + '&includeSeen=' + p.includeSeen).then(function (d) {
+            if (!alive() || !p.open) return;
+            p.data = d;
+            if (p.genre && !d.candidates.some(function (c) { return c.genres.indexOf(p.genre) >= 0; })) p.genre = '';
+            renderPick();
+        }).catch(function (e) { fail(e); p.open = false; renderPick(); });
+    }
+
+    // Durée : films seulement (celle d'une série est celle d'un épisode). Durée inconnue : gardé.
+    function pickPool() {
+        var p = state.pick;
+        return (p.data ? p.data.candidates : []).filter(function (c) {
+            return (!p.type || c.type === p.type)
+                && (!p.maxMin || c.type !== 'Movie' || !c.runtimeMinutes || c.runtimeMinutes <= +p.maxMin)
+                && (!p.genre || c.genres.indexOf(p.genre) >= 0);
+        });
+    }
+
+    function options(list, current) {
+        return list.map(function (o) { return '<option value="' + esc(o[0]) + '"' + (o[0] === current ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join('');
+    }
+
+    function pickResultHtml(c) {
+        if (!c) return '';
+        var meta = [c.type === 'Series' ? 'Série' : 'Film'];
+        if (c.runtimeMinutes) meta.push(c.type === 'Series' ? 'épisodes de ' + fmtMinutes(c.runtimeMinutes) : fmtMinutes(c.runtimeMinutes));
+        if (c.genres.length) meta.push(c.genres.slice(0, 3).join(', '));
+        return '<img alt="" src="' + esc(img(c.itemId, 330)) + '" onerror="this.style.visibility=\'hidden\'">'
+            + '<div><h3>' + esc(c.title) + (c.year ? ' (' + c.year + ')' : '') + '</h3>'
+            + '<div class="wl-meta">' + esc(meta.join(' · ')) + '</div>'
+            + '<div class="wl-meta">dans ' + c.lists.map(function (n) { return '« ' + esc(n) + ' »'; }).join(', ') + '</div>'
+            + '<div class="wl-row"><a class="wl-btn primary" href="' + esc(itemLink(c.itemId)) + '"><span class="material-icons">info</span>Voir la fiche</a>'
+            + '<button class="wl-btn" data-act="pick-draw"><span class="material-icons">casino</span>Un autre</button></div></div>';
+    }
+
+    function pickCountText() {
+        var n = pickPool().length;
+        return n === 0 ? 'Aucun titre possible' : n + ' titre' + (n > 1 ? 's' : '') + ' possible' + (n > 1 ? 's' : '');
+    }
+
+    function renderPick() {
+        var box = root.querySelector('.wl-pick');
+        var toggle = root.querySelector('[data-act="pick"]');
+        if (toggle) toggle.setAttribute('aria-expanded', String(state.pick.open));
+        if (!box) return;
+        var p = state.pick;
+        if (!p.open) { box.innerHTML = ''; return; }
+        if (!p.data) { box.innerHTML = '<div class="wl-panel wl-loading">Chargement…</div>'; return; }
+        var d = p.data;
+        var genres = [];
+        d.candidates.forEach(function (c) { c.genres.forEach(function (g) { if (genres.indexOf(g) < 0) genres.push(g); }); });
+        genres.sort(function (a, b) { return a.localeCompare(b, 'fr'); });
+        box.innerHTML = '<div class="wl-panel wl-pick-panel"><h2>Que regarder ?</h2>'
+            + (d.partners.length
+                ? '<div class="wl-row"><span class="wl-meta">Vous et :</span>' + d.partners.map(function (u) {
+                    return '<label class="wl-check"><input type="checkbox" data-pick-member value="' + esc(u.id) + '"' + (p.members.indexOf(u.id) >= 0 ? ' checked' : '') + '>' + esc(u.name) + '</label>';
+                }).join('') + '</div>'
+                : '')
+            + '<div class="wl-row wl-meta">' + (d.lists.length
+                ? 'Dans : ' + d.lists.map(function (l) { return '« ' + esc(l.name) + ' »'; }).join(', ')
+                : 'Aucune liste dont vous êtes tous membres.') + '</div>'
+            + '<div class="wl-row">'
+            + '<select class="wl-select" data-pick="type" aria-label="Type">' + options(PICK_TYPES, p.type) + '</select>'
+            + '<select class="wl-select" data-pick="maxMin" aria-label="Durée des films">' + options(PICK_DURATIONS, p.maxMin) + '</select>'
+            + '<select class="wl-select" data-pick="genre" aria-label="Genre">' + options([['', 'Tous les genres']].concat(genres.map(function (g) { return [g, g]; })), p.genre) + '</select>'
+            + '<label class="wl-check"><input type="checkbox" data-pick-seen' + (p.includeSeen ? ' checked' : '') + '>Inclure les déjà vus</label>'
+            + '</div>'
+            + '<div class="wl-row"><button class="wl-btn primary" data-act="pick-draw"><span class="material-icons">casino</span>Tirer au sort</button>'
+            + '<span class="wl-meta wl-pick-count">' + pickCountText() + '</span></div>'
+            + '<div class="wl-pick-result">' + pickResultHtml(p.current) + '</div></div>';
+    }
+
+    function drawPick() {
+        var p = state.pick;
+        var pool = pickPool();
+        var result = root.querySelector('.wl-pick-result');
+        if (!pool.length) { if (result) result.innerHTML = '<div class="wl-meta">Aucun titre ne correspond.</div>'; p.current = null; return; }
+        var fresh = pool.filter(function (c) { return p.drawn.indexOf(c.itemId) < 0; });
+        if (!fresh.length) {
+            // Tout a été tiré : on recommence, sans retomber tout de suite sur le titre affiché.
+            p.drawn = [];
+            fresh = pool.length > 1 && p.current ? pool.filter(function (c) { return c.itemId !== p.current.itemId; }) : pool;
+        }
+        p.current = fresh[Math.floor(Math.random() * fresh.length)];
+        p.drawn.push(p.current.itemId);
+        if (result) result.innerHTML = pickResultHtml(p.current);
+    }
+
+    // ------------------------------------------------------------ rendu : détail
+    function openDetail(id) {
+        state.detailId = id;
+        state.settingsOpen = false;
+        state.filter = 'all';
+        state.availability = {};
+        state.userData = {};
+        root.innerHTML = '<div class="wl-loading">Chargement…</div>';
+        loadDetail();
+    }
+
+    function loadDetail() {
+        return api('GET', 'Watchlists/' + state.detailId).then(renderDetail).catch(function (e) { fail(e); backHome(); });
+    }
+
+    function backHome() { state.detailId = null; renderHome(); }
+
+    function renderDetail(w) {
+        if (!alive() || state.detailId !== w.id) return;
+        state.current = w;
+        var p = w.permissions;
+        var badges = (w.visibility === 'Public' ? '<span class="wl-badge pub">Publique</span>' : '<span class="wl-badge">Privée</span>')
+            + (w.memberCount > 1 ? '<span class="wl-badge shared">Commune</span>' : '')
+            + (w.myRole && w.myStatus === 'Accepted' ? '<span class="wl-badge">' + esc(roleLabel[w.myRole]) + '</span>' : '')
+            + (state.isAdmin && w.myStatus !== 'Accepted' && w.visibility !== 'Public' ? '<span class="wl-badge admin">Vue admin · lecture seule</span>' : '');
+
+        var actions = [];
+        if (p.canFollow) actions.push(w.isFollowed
+            ? '<button class="wl-btn" data-act="unfollow"><span class="material-icons">bookmark_remove</span>Ne plus suivre</button>'
+            : '<button class="wl-btn" data-act="follow"><span class="material-icons">bookmark_add</span>Suivre</button>');
+        if (p.canManage) actions.push('<button class="wl-btn" data-act="settings"><span class="material-icons">settings</span>Paramètres</button>');
+        if (p.canLeave) actions.push('<button class="wl-btn" data-act="leave"><span class="material-icons">logout</span>Quitter</button>');
+
+        var members = w.members.map(function (m) {
+            return '<span class="wl-chip">' + esc(m.name) + '<small>' + esc(roleLabel[m.role]) + (m.status === 'Invited' ? ' · invité' : '') + '</small></span>';
+        }).join('');
+
+        var html = '<div class="wl-row" style="margin-bottom:.75rem"><button class="wl-btn" data-act="back"><span class="material-icons">arrow_back</span>Retour</button></div>'
+            + '<div class="wl-detail-head"><div><h1>' + esc(w.name) + '</h1><div class="wl-badges">' + badges + '</div>'
+            + (w.description ? '<p class="wl-desc">' + esc(w.description) + '</p>' : '') + '</div>'
+            + '<div class="wl-actions">' + actions.join('') + '</div></div>'
+            + '<div class="wl-members">' + members + '</div>';
+
+        if (p.isInvited) {
+            html += '<div class="wl-banner"><span>Vous êtes invité à rejoindre cette watchlist.</span><span class="wl-row">'
+                + '<button class="wl-btn primary" data-act="accept">Accepter</button><button class="wl-btn" data-act="decline">Refuser</button></span></div>';
+        }
+
+        html += '<div class="wl-settings"></div>';
+
+        if (p.canEdit) {
+            html += '<div class="wl-search"><input class="wl-input" type="search" placeholder="Ajouter un film ou une série…" autocomplete="off" data-search>'
+                + '<div class="wl-results" hidden></div></div>';
+        }
+
+        var onServer = w.items.filter(function (it) { return it.available; }).length;
+        var absent = w.items.length - onServer;
+        html += '<h2>' + w.itemCount + ' titre' + (w.itemCount > 1 ? 's' : '') + (absent > 0 ? ' · ' + onServer + ' sur le serveur' : '') + '</h2>';
+        if (absent > 0 && onServer > 0) {
+            html += '<div class="wl-filters">' + [['all', 'Tous'], ['on', 'Sur le serveur (' + onServer + ')'], ['off', 'Pas sur le serveur (' + absent + ')']].map(function (f) {
+                return '<button class="wl-tab' + (state.filter === f[0] ? ' active' : '') + '" data-filter="' + f[0] + '">' + esc(f[1]) + '</button>';
+            }).join('') + '</div>';
+        }
+        var shown = w.items.filter(function (it) { return state.filter === 'all' || (state.filter === 'on') === it.available; });
+        // Mode « griser » : les titres vus par tous les membres passent en bas, grisés (ordre de la liste inchangé).
+        var dim = w.seenMode === 'Dim';
+        if (dim) shown = shown.filter(function (it) { return !it.seen; }).concat(shown.filter(function (it) { return it.seen; }));
+        html += w.items.length
+            ? '<div class="wl-items">' + shown.map(function (it) { var i = w.items.indexOf(it); return itemHtml(it, i, w.items.length, p.canEdit, dim && it.seen, w.memberCount > 1); }).join('') + '</div>'
+            : '<div class="wl-empty-state">' + (p.canEdit ? 'Liste vide. Utilisez la recherche ci-dessus pour ajouter des titres, même s\'ils ne sont pas sur le serveur.' : 'Liste vide.') + '</div>';
+
+        root.innerHTML = '';
+        root.appendChild(h(html));
+        if (state.settingsOpen && p.canManage) renderSettings(w);
+        if (absent > 0 && state.seerr.enabled) loadAvailability(w.id);
+        loadUserData(w);
+    }
+
+    // Vu / favori (données de l'utilisateur courant) des titres sur le serveur, chargés après le rendu.
+    // Via l'API Jellyfin : pour une série, « vu » = tous les épisodes vus.
+    function loadUserData(w) {
+        var ids = w.items.filter(function (it) { return it.available && it.itemId && !state.userData[norm(it.itemId)]; })
+            .map(function (it) { return it.itemId; });
+        for (var i = 0; i < ids.length; i += 100) {
+            client.getItems(userId, { Ids: ids.slice(i, i + 100).join(','), EnableImages: false, EnableTotalRecordCount: false }).then(function (res) {
+                if (!alive() || state.detailId !== w.id) return;
+                (res && res.Items || []).forEach(function (item) {
+                    var ud = item.UserData || {};
+                    state.userData[norm(item.Id)] = { played: !!ud.Played, fav: !!ud.IsFavorite };
+                });
+                (state.current.items || []).forEach(function (it) {
+                    var el = it.itemId && root.querySelector('.wl-item[data-entry="' + norm(it.entryId) + '"] .wl-marks');
+                    if (el) el.innerHTML = marksHtml(it);
+                });
+            }).catch(function () { /* pas de badges */ });
+        }
+    }
+
+    function marksHtml(it) {
+        var ud = it.itemId && state.userData[norm(it.itemId)];
+        if (!ud) return '';
+        return (ud.played ? '<span class="wl-mark played" title="Déjà vu"><span class="material-icons">check</span></span>' : '')
+            + (ud.fav ? '<span class="wl-mark fav" title="Favori"><span class="material-icons">favorite</span></span>' : '');
+    }
+
+    // Statut Jellyseerr (demandé / en cours...) des titres absents, chargé après le rendu.
+    function loadAvailability(listId) {
+        api('GET', 'Watchlists/' + listId + '/Availability').then(function (list) {
+            if (!alive() || state.detailId !== listId) return;
+            list.forEach(function (a) { state.availability[norm(a.entryId)] = a; });
+            list.forEach(function (a) {
+                var el = root.querySelector('.wl-item[data-entry="' + norm(a.entryId) + '"] .wl-status');
+                var it = (state.current.items || []).filter(function (i) { return norm(i.entryId) === norm(a.entryId); })[0];
+                if (el && it) el.innerHTML = statusHtml(it);
+            });
+        }).catch(function () { /* Jellyseerr injoignable : on garde « Pas sur le serveur » */ });
+    }
+
+    function statusHtml(it) {
+        if (it.available) return '';
+        var a = state.availability[norm(it.entryId)];
+        var info = statusInfo[a ? a.status : it.status] || statusInfo.NotOnServer;
+        var html = '<span class="wl-badge ' + info.cls + '">' + esc(info.label) + '</span>';
+        if (a && a.canRequest && it.tmdbId) {
+            html += '<button class="wl-btn primary" data-act="request" data-entry="' + esc(norm(it.entryId)) + '"><span class="material-icons">download</span>Demander</button>';
+        }
+        return html;
+    }
+
+    function itemHtml(it, i, n, canEdit, dimmed, shared) {
+        var key = esc(it.entryId);
+        var tools = canEdit
+            ? '<div class="wl-tools">'
+                + (i > 0 && !dimmed ? '<button class="wl-btn icon" title="Monter" data-act="up" data-item="' + key + '"><span class="material-icons">chevron_left</span></button>' : '')
+                + (i < n - 1 && !dimmed ? '<button class="wl-btn icon" title="Descendre" data-act="down" data-item="' + key + '"><span class="material-icons">chevron_right</span></button>' : '')
+                + '<button class="wl-btn icon" title="Note" data-act="note" data-item="' + key + '"><span class="material-icons">edit_note</span></button>'
+                + '<button class="wl-btn icon" title="Retirer" data-act="remove" data-item="' + key + '"><span class="material-icons">close</span></button>'
+                + '</div>'
+            : '';
+        var title = esc(it.title) + (it.year ? ' (' + it.year + ')' : '');
+        var poster;
+        if (it.available) {
+            poster = '<a class="wl-poster" href="' + esc(itemLink(it.itemId)) + '"><div class="wl-ph">' + esc(it.title) + '</div><img loading="lazy" alt="" src="' + esc(img(it.itemId)) + '" onerror="this.remove()" style="position:relative"><div class="wl-marks">' + marksHtml(it) + '</div></a>';
+        } else {
+            var tp = tmdbImg(it.posterPath, 342);
+            poster = '<div class="wl-poster"><div class="wl-ph">' + esc(it.title) + '</div>'
+                + (tp ? '<img loading="lazy" alt="" src="' + esc(tp) + '" onerror="this.remove()" style="position:relative">' : '')
+                + '<div class="wl-status">' + statusHtml(it) + '</div></div>';
+        }
+        return '<div class="wl-item' + (it.available ? '' : ' absent') + (dimmed ? ' seen' : '') + '" data-entry="' + esc(norm(it.entryId)) + '">' + poster + tools
+            + '<div class="wl-item-title" title="' + title + '">' + title + (it.type === 'Series' ? ' <span class="wl-badge">Série</span>' : '')
+                + (dimmed ? ' <span class="wl-badge">' + (shared ? 'Vu par tous' : 'Vu') + '</span>' : '') + '</div>'
+            + (it.note ? '<div class="wl-note">' + esc(it.note) + '</div>' : '')
+            + '<div class="wl-meta" style="font-size:.75em">par ' + esc(it.addedBy.name) + '</div></div>';
+    }
+
+    // ------------------------------------------------------------ paramètres (owner)
+    function loadUsers() {
+        if (state.users) return Promise.resolve(state.users);
+        return api('GET', 'Watchlists/Users').then(function (u) { state.users = u; return u; });
+    }
+
+    function renderSettings(w) {
+        var box = root.querySelector('.wl-settings');
+        if (!box) return;
+        loadUsers().then(function (users) {
+            if (!alive() || state.detailId !== w.id) return;
+            var memberIds = w.members.map(function (m) { return m.userId; });
+            var candidates = users.filter(function (u) { return memberIds.indexOf(u.id) < 0; });
+            var rows = w.members.filter(function (m) { return m.role !== 'Owner'; }).map(function (m) {
+                return '<div class="wl-member-row"><span class="wl-name">' + esc(m.name) + (m.status === 'Invited' ? ' <span class="wl-badge inv">invitation envoyée</span>' : '') + '</span>'
+                    + '<select class="wl-select" data-member-role="' + esc(m.userId) + '">'
+                    + ['Editor', 'Viewer'].map(function (r) { return '<option value="' + r + '"' + (m.role === r ? ' selected' : '') + '>' + roleLabel[r] + '</option>'; }).join('')
+                    + '</select>'
+                    + (m.status === 'Accepted' ? '<button class="wl-btn" data-act="transfer" data-member="' + esc(m.userId) + '">Transférer la propriété</button>' : '')
+                    + '<button class="wl-btn" data-act="kick" data-member="' + esc(m.userId) + '">' + (m.status === 'Invited' ? 'Annuler' : 'Retirer') + '</button></div>';
+            }).join('');
+
+            box.innerHTML = '';
+            box.appendChild(h('<div class="wl-panel">'
+                + '<form class="wl-form" data-form="update">'
+                + '<label>Nom<input class="wl-input" name="name" maxlength="100" required value="' + esc(w.name) + '"></label>'
+                + '<label>Description<textarea class="wl-textarea" name="description" maxlength="500">' + esc(w.description) + '</textarea></label>'
+                + '<label>Visibilité<select class="wl-select" name="visibility">'
+                + '<option value="Private"' + (w.visibility === 'Private' ? ' selected' : '') + '>Privée (membres uniquement)</option>'
+                + '<option value="Public"' + (w.visibility === 'Public' ? ' selected' : '') + '>Publique (visible par tous les utilisateurs)</option></select></label>'
+                + '<label>Titres vus' + (w.memberCount > 1 ? ' (par tous les membres)' : '') + '<select class="wl-select" name="seenMode">'
+                + options([['Keep', 'Les garder'], ['Dim', 'Les griser et les mettre en bas'], ['Remove', 'Les retirer automatiquement']], w.seenMode || 'Keep') + '</select>'
+                + '<span class="wl-meta">Retirer : les titres déjà vus partent dès l\'enregistrement, les autres dès qu\'ils sont vus.</span></label>'
+                + '<div class="wl-row"><button class="wl-btn primary" type="submit">Enregistrer</button></div></form>'
+                + '<h2>Membres</h2>' + (rows || '<div class="wl-meta">Aucun autre membre : invitez quelqu\'un pour en faire une liste commune.</div>')
+                + (candidates.length
+                    ? '<form class="wl-row" data-form="invite" style="margin-top:1rem">'
+                        + '<select class="wl-select" name="userId" style="width:auto">' + candidates.map(function (u) { return '<option value="' + esc(u.id) + '">' + esc(u.name) + '</option>'; }).join('') + '</select>'
+                        + '<select class="wl-select" name="role" style="width:auto"><option value="Editor">Éditeur</option><option value="Viewer">Lecteur</option></select>'
+                        + (state.isAdmin ? '<label class="wl-row" style="font-size:.85em"><input type="checkbox" name="force"> ajout direct (admin)</label>' : '')
+                        + '<button class="wl-btn primary" type="submit"><span class="material-icons">person_add</span>Inviter</button></form>'
+                    : '')
+                + '<h2>Zone dangereuse</h2><button class="wl-btn danger" data-act="delete"><span class="material-icons">delete</span>Supprimer la watchlist</button>'
+                + '</div>'));
+        }).catch(fail);
+    }
+
+    // ------------------------------------------------------------ recherche d'items
+    // Serveur (API Jellyfin) + TMDB via Jellyseerr (titres absents du serveur), fusionnés par id TMDB.
+    var searchTimer = null, searchSeq = 0, searchResults = {};
+    function runSearch(input) {
+        var term = input.value.trim();
+        var box = input.parentNode.querySelector('.wl-results');
+        clearTimeout(searchTimer);
+        if (term.length < 2) { box.hidden = true; box.innerHTML = ''; return; }
+        searchTimer = setTimeout(function () {
+            var seq = ++searchSeq;
+            var local = client.getItems(userId, { SearchTerm: term, IncludeItemTypes: 'Movie,Series', Recursive: true, Limit: 12, Fields: 'ProductionYear,ProviderIds', EnableTotalRecordCount: false })
+                .then(function (r) { return r.Items || []; });
+            var remote = state.seerr.enabled
+                ? api('GET', 'Watchlists/Search?query=' + encodeURIComponent(term)).catch(function (e) { return { error: e.message }; })
+                : Promise.resolve([]);
+            Promise.all([local, remote]).then(function (res) {
+                if (seq !== searchSeq || !alive()) return;
+                var items = (state.current ? state.current.items : []);
+                var inListItem = items.map(function (i) { return norm(i.itemId); });
+                var inListTmdb = items.map(function (i) { return i.type + ':' + (i.tmdbId || ''); });
+                searchResults = {};
+                var serverTmdb = {};
+                var rows = res[0].map(function (it) {
+                    var type = it.Type === 'Series' ? 'Series' : 'Movie';
+                    var tmdb = it.ProviderIds && (it.ProviderIds.Tmdb || it.ProviderIds.tmdb);
+                    if (tmdb) serverTmdb[type + ':' + tmdb] = true;
+                    var already = inListItem.indexOf(norm(it.Id)) >= 0 || (tmdb && inListTmdb.indexOf(type + ':' + tmdb) >= 0);
+                    var k = 'i' + norm(it.Id);
+                    searchResults[k] = { itemId: it.Id };
+                    var thumb = it.ImageTags && it.ImageTags.Primary
+                        ? '<img alt="" src="' + esc(client.getUrl('Items/' + it.Id + '/Images/Primary', { fillHeight: 108, tag: it.ImageTags.Primary })) + '">'
+                        : '<span class="wl-ph"></span>';
+                    return '<div class="wl-result" data-add="' + esc(k) + '">' + thumb + '<div><div>' + esc(it.Name) + '</div>'
+                        + '<div class="wl-meta">' + (it.ProductionYear || '') + ' · ' + (type === 'Series' ? 'Série' : 'Film') + '</div></div>'
+                        + (already ? '<span class="wl-tag in">déjà dans la liste</span>' : '<span class="wl-tag ok">Sur le serveur</span>') + '</div>';
+                });
+                var html = rows.length ? '<div class="wl-section">Sur le serveur</div>' + rows.join('') : '';
+                var remoteRes = res[1];
+                if (remoteRes && remoteRes.error) {
+                    html += '<div class="wl-result wl-meta">Recherche Jellyseerr indisponible : ' + esc(remoteRes.error) + '</div>';
+                } else if (state.seerr.enabled) {
+                    var others = remoteRes.filter(function (m) { return !serverTmdb[m.type + ':' + m.tmdbId] && !m.itemId; });
+                    if (others.length) {
+                        html += '<div class="wl-section">Pas sur le serveur (TMDB)</div>' + others.slice(0, 12).map(function (m) {
+                            var k = 't' + m.type + m.tmdbId;
+                            searchResults[k] = { tmdbId: m.tmdbId, mediaType: m.mediaType };
+                            var already = inListTmdb.indexOf(m.type + ':' + m.tmdbId) >= 0;
+                            var info = statusInfo[m.status] || statusInfo.NotOnServer;
+                            var tp = tmdbImg(m.posterPath, 92);
+                            return '<div class="wl-result" data-add="' + esc(k) + '">' + (tp ? '<img alt="" src="' + esc(tp) + '">' : '<span class="wl-ph"></span>')
+                                + '<div><div>' + esc(m.title) + '</div><div class="wl-meta">' + (m.year || '') + ' · ' + (m.type === 'Series' ? 'Série' : 'Film') + '</div></div>'
+                                + (already ? '<span class="wl-tag in">déjà dans la liste</span>' : '<span class="wl-tag ' + info.cls + '">' + esc(info.label) + '</span>') + '</div>';
+                        }).join('');
+                    }
+                }
+                box.innerHTML = html || '<div class="wl-result wl-meta">Aucun résultat' + (state.seerr.enabled ? '' : ' sur le serveur (Jellyseerr non configuré : impossible d\'ajouter un titre absent)') + '</div>';
+                box.hidden = false;
+            }).catch(fail);
+        }, 300);
+    }
+
+    // ------------------------------------------------------------ actions
+    function act(promise, msg) {
+        return promise.then(function (r) { if (msg) toast(msg); return r; }).catch(function (e) { fail(e); throw e; });
+    }
+    function refreshWith(promise, msg) {
+        return act(promise, msg).then(function (w) { if (w && w.id) renderDetail(w); else return loadDetail(); }, function () {});
+    }
+    function move(entryId, delta) {
+        var ids = state.current.items.map(function (i) { return i.entryId; });
+        var i = ids.indexOf(entryId), j = i + delta;
+        if (i < 0 || j < 0 || j >= ids.length) return;
+        ids[i] = ids[j]; ids[j] = entryId;
+        refreshWith(api('PUT', 'Watchlists/' + state.detailId + '/Items/Order', { itemIds: ids }));
+    }
+
+    root.addEventListener('click', function (e) {
+        var tab = pick(e, '[data-tab]');
+        if (tab) { state.tab = tab.getAttribute('data-tab'); renderHome(); return; }
+
+        var filter = pick(e, '[data-filter]');
+        if (filter) { state.filter = filter.getAttribute('data-filter'); renderDetail(state.current); return; }
+
+        var add = pick(e, '[data-add]');
+        if (add) {
+            var input = root.querySelector('[data-search]');
+            var payload = searchResults[add.getAttribute('data-add')];
+            if (!payload) return;
+            var listId = state.detailId;
+            refreshWith(api('POST', 'Watchlists/' + listId + '/Items', payload).then(function (w) {
+                // Proposition de liste commune : affichée par header.js (File Transformation) s'il est chargé.
+                if (window.__watchlistsShowMatches) window.__watchlistsShowMatches(w, listId);
+                return w;
+            }), 'Ajouté').then(function () {
+                var i = root.querySelector('[data-search]');
+                if (i) { i.value = input ? input.value : ''; i.focus(); runSearch(i); }
+            });
+            return;
+        }
+
+        var open = pick(e, '[data-open]');
+        if (open) { openDetail(open.getAttribute('data-open')); return; }
+
+        var b = pick(e, '[data-act]');
+        if (!b) {
+            var res = root.querySelector('.wl-results');
+            if (res && !e.target.closest('.wl-search')) res.hidden = true;
+            return;
+        }
+        var a = b.getAttribute('data-act');
+        var id = state.detailId;
+        var item = b.getAttribute('data-item');
+        var member = b.getAttribute('data-member');
+        switch (a) {
+            case 'new': showNewForm(); break;
+            case 'pick':
+                state.pick.open = !state.pick.open;
+                if (state.pick.open) loadPick(); else renderPick();
+                break;
+            case 'pick-draw': drawPick(); break;
+            case 'cancel-new': root.querySelector('.wl-new').innerHTML = ''; break;
+            case 'back': backHome(); break;
+            case 'settings':
+                state.settingsOpen = !state.settingsOpen;
+                if (state.settingsOpen) renderSettings(state.current); else root.querySelector('.wl-settings').innerHTML = '';
+                break;
+            case 'follow': refreshWith(api('POST', 'Watchlists/' + id + '/Follow'), 'Liste suivie'); break;
+            case 'unfollow': refreshWith(api('DELETE', 'Watchlists/' + id + '/Follow'), 'Liste retirée de vos suivis'); break;
+            case 'accept': refreshWith(api('POST', 'Watchlists/' + id + '/Invitation/Accept'), 'Invitation acceptée'); break;
+            case 'decline':
+                act(api('POST', 'Watchlists/' + id + '/Invitation/Decline'), 'Invitation refusée').then(backHome, function () {});
+                break;
+            case 'leave':
+                if (confirm('Quitter cette watchlist ?')) act(api('DELETE', 'Watchlists/' + id + '/Members/' + userId), 'Vous avez quitté la liste').then(backHome, function () {});
+                break;
+            case 'delete':
+                if (confirm('Supprimer définitivement « ' + state.current.name + ' » pour tous ses membres ?')) act(api('DELETE', 'Watchlists/' + id), 'Watchlist supprimée').then(backHome, function () {});
+                break;
+            case 'remove': refreshWith(api('DELETE', 'Watchlists/' + id + '/Items/' + item)); break;
+            case 'up': move(item, -1); break;
+            case 'down': move(item, 1); break;
+            case 'request':
+                var rq = state.current.items.filter(function (i) { return norm(i.entryId) === b.getAttribute('data-entry'); })[0];
+                if (!rq) break;
+                b.disabled = true;
+                act(api('POST', 'Watchlists/Request', { tmdbId: rq.tmdbId, mediaType: rq.mediaType }), 'Demande envoyée à Jellyseerr').then(function (r) {
+                    state.availability[norm(rq.entryId)] = { entryId: rq.entryId, status: r.status, canRequest: false };
+                    var el = root.querySelector('.wl-item[data-entry="' + norm(rq.entryId) + '"] .wl-status');
+                    if (el) el.innerHTML = statusHtml(rq);
+                }, function () { b.disabled = false; });
+                break;
+            case 'note':
+                var cur = state.current.items.filter(function (i) { return i.entryId === item; })[0];
+                var note = prompt('Note (300 caractères max, vide pour effacer)', cur ? cur.note : '');
+                if (note !== null) refreshWith(api('PATCH', 'Watchlists/' + id + '/Items/' + item, { note: note }));
+                break;
+            case 'transfer':
+                if (confirm('Transférer la propriété ? Vous deviendrez éditeur.')) refreshWith(api('PATCH', 'Watchlists/' + id + '/Members/' + member, { role: 'Owner' }), 'Propriété transférée');
+                break;
+            case 'kick':
+                act(api('DELETE', 'Watchlists/' + id + '/Members/' + member)).then(loadDetail, function () {});
+                break;
+        }
+    });
+
+    root.addEventListener('change', function (e) {
+        var pm = pick(e, '[data-pick-member]');
+        if (pm) {
+            var ms = state.pick.members.filter(function (m) { return m !== pm.value; });
+            if (pm.checked) ms.push(pm.value);
+            state.pick.members = ms;
+            loadPick();
+            return;
+        }
+        if (pick(e, '[data-pick-seen]')) { state.pick.includeSeen = e.target.checked; loadPick(); return; }
+        var pf = pick(e, '[data-pick]');
+        if (pf) {
+            state.pick[pf.getAttribute('data-pick')] = pf.value;
+            state.pick.drawn = [];
+            var count = root.querySelector('.wl-pick-count');
+            if (count) count.textContent = pickCountText();
+            return;
+        }
+        var sel = pick(e, '[data-member-role]');
+        if (sel) refreshWith(api('PATCH', 'Watchlists/' + state.detailId + '/Members/' + sel.getAttribute('data-member-role'), { role: sel.value }), 'Rôle modifié');
+    });
+
+    root.addEventListener('input', function (e) {
+        if (e.target.matches('[data-search]')) runSearch(e.target);
+    });
+
+    root.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' && e.target.matches('.wl-card')) { openDetail(e.target.getAttribute('data-open')); }
+        if (e.key === 'Escape' && e.target.matches('[data-search]')) { e.target.value = ''; runSearch(e.target); }
+    });
+
+    root.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var f = e.target;
+        var kind = f.getAttribute('data-form');
+        var data = { };
+        Array.prototype.forEach.call(f.elements, function (el) {
+            if (!el.name) return;
+            data[el.name] = el.type === 'checkbox' ? el.checked : el.value;
+        });
+        if (kind === 'create') {
+            act(api('POST', 'Watchlists', data), 'Watchlist créée').then(function (w) { state.tab = 'mine'; openDetail(w.id); }, function () {});
+        } else if (kind === 'update') {
+            refreshWith(api('PATCH', 'Watchlists/' + state.detailId, data), 'Enregistré');
+        } else if (kind === 'invite') {
+            refreshWith(api('POST', 'Watchlists/' + state.detailId + '/Members', data), data.force ? 'Membre ajouté' : 'Invitation envoyée');
+        }
+    });
+
+    // ------------------------------------------------------------ init
+    client.getCurrentUser().then(function (u) {
+        state.isAdmin = !!(u && u.Policy && u.Policy.IsAdministrator);
+        // Onglet admin : ajouté une fois le rôle connu.
+        if (state.isAdmin && !state.detailId && alive()) {
+            var bar = root.querySelector('.wl-tabs');
+            if (bar && !bar.querySelector('[data-tab="admin"]')) bar.appendChild(h('<button class="wl-tab" data-tab="admin">Toutes (admin)</button>'));
+        }
+    }).catch(function () {});
+    api('GET', 'Watchlists/Seerr').then(function (st) {
+        state.seerr = st || { enabled: false };
+        if (state.detailId && state.current && alive()) renderDetail(state.current);
+    }).catch(function () {});
+    renderHome();
+})();
+</script>
+</div>

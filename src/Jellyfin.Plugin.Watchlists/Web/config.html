@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <title>Watchlists</title>
+</head>
+<body>
+<div class="page type-interior pluginConfigurationPage" data-require="emby-input,emby-checkbox,emby-button" data-role="page" id="WatchlistsConfigPage">
+    <div data-role="content">
+        <div class="content-primary">
+            <form id="WatchlistsConfigForm">
+                <div class="verticalSection">
+                    <h2 class="sectionTitle">Jellyseerr</h2>
+                    <p class="fieldDescription">Recherche des titres absents du serveur, statut (demandé, en cours...) et demandes au nom de l'utilisateur. La clé reste côté serveur, elle n'est jamais envoyée aux navigateurs.</p>
+                    <div class="inputContainer">
+                        <input is="emby-input" type="url" id="wlSeerrUrl" label="URL de Jellyseerr (vue depuis le serveur Jellyfin)" placeholder="http://10.30.0.5:5055" />
+                        <div class="fieldDescription">URL interne de préférence. « /api/v1 » est ajouté automatiquement.</div>
+                    </div>
+                    <div class="inputContainer">
+                        <input is="emby-input" type="password" id="wlSeerrApiKey" label="Clé d'API Jellyseerr" autocomplete="off" />
+                        <div class="fieldDescription">Jellyseerr → Paramètres → Général → Clé d'API.</div>
+                    </div>
+                    <button is="emby-button" type="button" class="raised button-alt block" id="wlTestSeerr"><span>Tester la connexion</span></button>
+                    <div id="wlTestResult" class="fieldDescription" style="margin-top:.5em"></div>
+                </div>
+
+                <div class="verticalSection">
+                    <h2 class="sectionTitle">Tag pour Maintainerr</h2>
+                    <p class="fieldDescription">Le tag est posé sur chaque film / série <b>présent sur le serveur</b> et dans <b>au moins une watchlist</b>, et retiré sinon. Si Maintainerr supprime le fichier, le titre reste dans la watchlist ; le tag revient s'il est re-téléchargé. Dans Maintainerr, utilisez la propriété <i>Labels</i>.</p>
+                    <div class="checkboxContainer checkboxContainer-withDescription">
+                        <label>
+                            <input is="emby-checkbox" type="checkbox" id="wlTagEnabled" />
+                            <span>Activer le tag</span>
+                        </label>
+                    </div>
+                    <div class="inputContainer">
+                        <input is="emby-input" type="text" id="wlTagName" label="Nom du tag" maxlength="50" />
+                        <div class="fieldDescription">Attention : le plugin retire ce tag des titres qui ne sont dans aucune watchlist, ne l'utilisez pas pour autre chose. En cas de renommage, l'ancien tag est retiré à la synchro suivante.</div>
+                    </div>
+                    <button is="emby-button" type="button" class="raised button-alt block" id="wlSyncTags"><span>Synchroniser maintenant</span></button>
+                    <div id="wlSyncResult" class="fieldDescription" style="margin-top:.5em"></div>
+                </div>
+
+                <button is="emby-button" type="submit" class="raised button-submit block"><span>Enregistrer</span></button>
+            </form>
+        </div>
+    </div>
+    <script type="text/javascript">
+        (function () {
+            var pluginId = '4ac0b6ae-8aaf-499f-83e9-3886c2f24b6d';
+            var page = document.querySelector('#WatchlistsConfigPage');
+            var form = page.querySelector('#WatchlistsConfigForm');
+            var $ = function (id) { return page.querySelector('#' + id); };
+
+            function post(path) {
+                return ApiClient.ajax({ type: 'POST', url: ApiClient.getUrl(path), dataType: 'json' }).catch(function (err) {
+                    if (err && typeof err.json === 'function') {
+                        return err.json().then(function (j) { throw new Error(j && j.error ? j.error : 'Erreur ' + err.status); });
+                    }
+                    throw err instanceof Error ? err : new Error('Erreur réseau');
+                });
+            }
+
+            function save() {
+                return ApiClient.getPluginConfiguration(pluginId).then(function (config) {
+                    config.SeerrUrl = $('wlSeerrUrl').value.trim();
+                    config.SeerrApiKey = $('wlSeerrApiKey').value.trim();
+                    config.TagEnabled = $('wlTagEnabled').checked;
+                    config.TagName = $('wlTagName').value.trim() || 'watchlist';
+                    return ApiClient.updatePluginConfiguration(pluginId, config);
+                });
+            }
+
+            page.addEventListener('pageshow', function () {
+                Dashboard.showLoadingMsg();
+                ApiClient.getPluginConfiguration(pluginId).then(function (config) {
+                    $('wlSeerrUrl').value = config.SeerrUrl || '';
+                    $('wlSeerrApiKey').value = config.SeerrApiKey || '';
+                    $('wlTagEnabled').checked = config.TagEnabled !== false;
+                    $('wlTagName').value = config.TagName || 'watchlist';
+                    Dashboard.hideLoadingMsg();
+                });
+            });
+
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                Dashboard.showLoadingMsg();
+                save().then(function (result) {
+                    Dashboard.processPluginConfigurationUpdateResult(result);
+                    return post('Watchlists/Admin/SyncTags').catch(function () { });
+                });
+                return false;
+            });
+
+            $('wlTestSeerr').addEventListener('click', function () {
+                var out = $('wlTestResult');
+                out.textContent = 'Test en cours…';
+                save().then(function () { return post('Watchlists/Admin/TestSeerr'); })
+                    .then(function (r) { out.textContent = '✔ Connecté à Jellyseerr ' + r.version + ' (configuration enregistrée).'; })
+                    .catch(function (e) { out.textContent = '✘ ' + e.message; });
+            });
+
+            $('wlSyncTags').addEventListener('click', function () {
+                var out = $('wlSyncResult');
+                out.textContent = 'Synchronisation…';
+                save().then(function () { return post('Watchlists/Admin/SyncTags'); })
+                    .then(function (r) {
+                        out.textContent = r.skipped
+                            ? r.skipped
+                            : '✔ ' + r.onServer + ' / ' + r.inWatchlists + ' titres de watchlist sur le serveur — ' + r.tagged + ' tag(s) ajouté(s), ' + r.untagged + ' retiré(s).';
+                    })
+                    .catch(function (e) { out.textContent = '✘ ' + e.message; });
+            });
+        })();
+    </script>
+</div>
+</body>
+</html>

@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <!-- Tests d'intégration hors-ligne : héberge le contrôleur du plugin dans un mini serveur ASP.NET
+       avec des faux services Jellyfin (stubs). Lancer : dotnet run (depuis tests/Watchlists.ApiTests) -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/Jellyfin.Plugin.Watchlists/Jellyfin.Plugin.Watchlists.csproj" AdditionalProperties="UseStubs=true" />
+    <Reference Include="MediaBrowser.Model"><HintPath>../../build/stubs/out/MediaBrowser.Model.dll</HintPath></Reference>
+    <Reference Include="MediaBrowser.Common"><HintPath>../../build/stubs/out/MediaBrowser.Common.dll</HintPath></Reference>
+    <Reference Include="MediaBrowser.Controller"><HintPath>../../build/stubs/out/MediaBrowser.Controller.dll</HintPath></Reference>
+    <Reference Include="Jellyfin.Data"><HintPath>../../build/stubs/out/Jellyfin.Data.dll</HintPath></Reference>
+    <Reference Include="Jellyfin.Database.Implementations"><HintPath>../../build/stubs/out/Jellyfin.Database.Implementations.dll</HintPath></Reference>
+  </ItemGroup>
+</Project>

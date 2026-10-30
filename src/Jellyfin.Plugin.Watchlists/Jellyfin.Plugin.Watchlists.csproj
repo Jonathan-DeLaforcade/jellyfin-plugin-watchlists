@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>Jellyfin.Plugin.Watchlists</RootNamespace>
+    <AssemblyVersion>1.12.0.0</AssemblyVersion>
+    <FileVersion>1.12.0.0</FileVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <!-- Jellyfin version the plugin is compiled against (ABI). Works on 12.x. -->
+    <JellyfinVersion>12.0.0</JellyfinVersion>
+    <!--
+      UseStubs=true : build hors-ligne contre les stubs de signatures (build/stubs),
+      utilisé pour produire la DLL fournie quand NuGet n'est pas joignable.
+      Par défaut (false) : build canonique contre les vrais paquets NuGet Jellyfin.
+    -->
+    <UseStubs Condition="'$(UseStubs)' == ''">false</UseStubs>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(UseStubs)' != 'true'">
+    <PackageReference Include="Jellyfin.Controller" Version="$(JellyfinVersion)" ExcludeAssets="runtime" />
+    <PackageReference Include="Jellyfin.Model" Version="$(JellyfinVersion)" ExcludeAssets="runtime" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(UseStubs)' == 'true'">
+    <Reference Include="MediaBrowser.Model"><HintPath>../../build/stubs/out/MediaBrowser.Model.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="MediaBrowser.Common"><HintPath>../../build/stubs/out/MediaBrowser.Common.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="MediaBrowser.Controller"><HintPath>../../build/stubs/out/MediaBrowser.Controller.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="Jellyfin.Data"><HintPath>../../build/stubs/out/Jellyfin.Data.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="Jellyfin.Database.Implementations"><HintPath>../../build/stubs/out/Jellyfin.Database.Implementations.dll</HintPath><Private>false</Private></Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Web\watchlists.html" />
+    <EmbeddedResource Include="Web\header.js" />
+    <EmbeddedResource Include="Web\config.html" />
+  </ItemGroup>
+
+</Project>
